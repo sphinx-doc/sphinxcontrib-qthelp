@@ -19,7 +19,7 @@ from docutils import nodes
 from sphinx import addnodes
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.environment.adapters.indexentries import IndexEntries
-from sphinx.locale import __
+from sphinx.locale import get_translation
 from sphinx.util import logging
 from sphinx.util.nodes import NodeMatcher
 from sphinx.util.osutil import canon_path, make_filename
@@ -34,6 +34,9 @@ if False:
 
 
 logger = logging.getLogger(__name__)
+package_dir = path.abspath(path.dirname(__file__))
+
+__ = get_translation(__name__, 'console')
 
 
 _idpattern = re.compile(
@@ -45,7 +48,6 @@ section_template = '<section title="%(title)s" ref="%(ref)s"/>'
 
 def render_file(filename, **kwargs):
     # type: (str, Any) -> str
-    package_dir = path.abspath(path.dirname(__file__))
     pathname = path.join(package_dir, 'templates', filename)
     return SphinxRenderer.render_from_file(pathname, kwargs)
 
@@ -270,6 +272,7 @@ def setup(app):
     # type: (Sphinx) -> Dict[str, Any]
     app.setup_extension('sphinx.builders.html')
     app.add_builder(QtHelpBuilder)
+    app.add_message_catalog(__name__, path.join(package_dir, 'locales'))
 
     app.add_config_value('qthelp_basename', lambda self: make_filename(self.project), None)
     app.add_config_value('qthelp_namespace', None, 'html', [str])

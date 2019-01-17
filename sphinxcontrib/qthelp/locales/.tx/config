@@ -1,10 +1,10 @@
 [main]
 host = https://www.transifex.com
 
-[sphinx-1.qthelp-pot]
-file_filter = <lang>/LC_MESSAGES/qthelp.po
+[sphinx-1.sphinxcontrib-qthelp-pot]
+file_filter = <lang>/LC_MESSAGES/sphinxcontrib.qthelp.po
 minimum_perc = 0
-source_file = qthelp.pot
+source_file = sphinxcontrib.qthelp.pot
 source_lang = en
 type = PO
 
