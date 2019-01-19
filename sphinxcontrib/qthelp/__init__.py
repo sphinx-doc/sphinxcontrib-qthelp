@@ -13,10 +13,12 @@ import os
 import posixpath
 import re
 from os import path
-from typing import Iterable, cast
+from typing import Any, Dict, Iterable, List, Tuple, cast
 
 from docutils import nodes
+from docutils.nodes import Node
 from sphinx import addnodes
+from sphinx.application import Sphinx
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.environment.adapters.indexentries import IndexEntries
 from sphinx.locale import get_translation
@@ -26,11 +28,6 @@ from sphinx.util.osutil import canon_path, make_filename
 from sphinx.util.template import SphinxRenderer
 
 from sphinxcontrib.qthelp.version import __version__
-
-if False:
-    # For type annotation
-    from typing import Any, Dict, List, Tuple  # NOQA
-    from sphinx.application import Sphinx  # NOQA
 
 
 logger = logging.getLogger(__name__)
@@ -46,8 +43,7 @@ _idpattern = re.compile(
 section_template = '<section title="%(title)s" ref="%(ref)s"/>'
 
 
-def render_file(filename, **kwargs):
-    # type: (str, Any) -> str
+def render_file(filename: str, **kwargs: Any) -> str:
     pathname = path.join(package_dir, 'templates', filename)
     return SphinxRenderer.render_from_file(pathname, kwargs)
 
@@ -79,24 +75,20 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
     # don't generate the search index or include the search page
     search = False
 
-    def init(self):
-        # type: () -> None
+    def init(self) -> None:
         super().init()
         # the output files for HTML help must be .html only
         self.out_suffix = '.html'
         self.link_suffix = '.html'
         # self.config.html_style = 'traditional.css'
 
-    def get_theme_config(self):
-        # type: () -> Tuple[str, Dict]
+    def get_theme_config(self) -> Tuple[str, Dict]:
         return self.config.qthelp_theme, self.config.qthelp_theme_options
 
-    def handle_finish(self):
-        # type: () -> None
+    def handle_finish(self) -> None:
         self.build_qhp(self.outdir, self.config.qthelp_basename)
 
-    def build_qhp(self, outdir, outname):
-        # type: (str, str) -> None
+    def build_qhp(self, outdir: str, outname: str) -> None:
         logger.info(__('writing project file...'))
 
         # sections
@@ -155,8 +147,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
                                homepage=homepage, startpage=startpage)
             f.write(body)
 
-    def isdocnode(self, node):
-        # type: (nodes.Node) -> bool
+    def isdocnode(self, node: Node) -> bool:
         if not isinstance(node, nodes.list_item):
             return False
         if len(node.children) != 2:
@@ -169,8 +160,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             return False
         return True
 
-    def write_toc(self, node, indentlevel=4):
-        # type: (nodes.Node, int) -> List[str]
+    def write_toc(self, node: Node, indentlevel: int = 4) -> List[str]:
         parts = []  # type: List[str]
         if isinstance(node, nodes.list_item) and self.isdocnode(node):
             compact_paragraph = cast(addnodes.compact_paragraph, node[0])
@@ -204,8 +194,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         return parts
 
-    def keyword_item(self, name, ref):
-        # type: (str, Any) -> str
+    def keyword_item(self, name: str, ref: Any) -> str:
         matchobj = _idpattern.match(name)
         if matchobj:
             groupdict = matchobj.groupdict()
@@ -227,8 +216,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         item.encode('ascii', 'xmlcharrefreplace')
         return item
 
-    def build_keywords(self, title, refs, subitems):
-        # type: (str, List[Any], Any) -> List[str]
+    def build_keywords(self, title: str, refs: List[Any], subitems: Any) -> List[str]:
         keywords = []  # type: List[str]
 
         # if len(refs) == 0: # XXX
@@ -250,8 +238,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         return keywords
 
-    def get_project_files(self, outdir):
-        # type: (str) -> List[str]
+    def get_project_files(self, outdir: str) -> List[str]:
         if not outdir.endswith(os.sep):
             outdir += os.sep
         olen = len(outdir)
@@ -268,8 +255,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         return project_files
 
 
-def setup(app):
-    # type: (Sphinx) -> Dict[str, Any]
+def setup(app: Sphinx) -> Dict[str, Any]:
     app.setup_extension('sphinx.builders.html')
     app.add_builder(QtHelpBuilder)
     app.add_message_catalog(__name__, path.join(package_dir, 'locales'))
