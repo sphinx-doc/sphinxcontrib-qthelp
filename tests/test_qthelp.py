@@ -62,9 +62,20 @@ def test_qthelp_escaped(app, status, warning):
     assert toc[0][3].attrib == {'title': 'baz', 'ref': 'baz.html'}
 
     keywords = et.find('.//keywords')
-    assert len(keywords) == 2
-    assert keywords[0].attrib == {'name': '<subsection>', 'ref': 'index.html#index-0'}
-    assert keywords[1].attrib == {'name': '"subsection"', 'ref': 'index.html#index-0'}
+    assert len(keywords) == 5
+    assert keywords[0].attrib == {'name': '<subsection>',
+                                  'ref': 'index.html#index-0'}
+    assert keywords[1].attrib == {'name': '& (ampersand)',
+                                  'id': 'ampersand.&',
+                                  'ref': 'index.html#index-0'}
+    assert keywords[2].attrib == {'name': '< (less)',
+                                  'id': 'less.<',
+                                  'ref': 'index.html#index-0'}
+    assert keywords[3].attrib == {'name': '"subsection"',
+                                  'ref': 'index.html#index-0'}
+    assert keywords[4].attrib == {'name': '> (greater)',
+                                  'id': 'greater.>',
+                                  'ref': 'index.html#index-0'}
 
 
 @pytest.mark.sphinx('qthelp', testroot='basic')

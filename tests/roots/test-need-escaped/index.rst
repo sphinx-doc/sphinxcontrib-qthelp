@@ -21,6 +21,9 @@ Contents:
 
 .. index::
    pair: "subsection"; <subsection>
+   single: & (ampersand)
+   single: < (less)
+   single: > (greater)
 
 ----------
 subsection
