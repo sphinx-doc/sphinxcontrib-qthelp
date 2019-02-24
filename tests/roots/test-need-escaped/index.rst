@@ -24,6 +24,9 @@ Contents:
    single: & (ampersand)
    single: < (less)
    single: > (greater)
+   single: Sphinx (document generator)
+   single: keyword1 (class in ID)
+   single: keyword2 (foo bar baz)
 
 ----------
 subsection
