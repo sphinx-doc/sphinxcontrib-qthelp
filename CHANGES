@@ -1,3 +1,8 @@
+Release 1.0.2 (2019-02-24)
+==========================
+
+* #6097: the keyword IDs are not escaped qthelp in .qhp file
+
 Release 1.0.1 (2019-02-15)
 ==========================
 

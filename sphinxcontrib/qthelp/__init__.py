@@ -203,7 +203,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             # descr = groupdict.get('descr')
             if shortname.endswith('()'):
                 shortname = shortname[:-2]
-            id = '%s.%s' % (id, shortname)
+            id = html.escape('%s.%s' % (id, shortname), True)
         else:
             id = None
 
