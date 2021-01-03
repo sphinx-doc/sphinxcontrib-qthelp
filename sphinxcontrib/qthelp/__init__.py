@@ -86,11 +86,10 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         return self.config.qthelp_theme, self.config.qthelp_theme_options
 
     def handle_finish(self) -> None:
-        if self.config.qthelp_basename != self.config.project:
-            self.epilog = self.epilog % {
-                'outdir': '%(outdir)s',
-                'project': self.config.qthelp_basename,
-            }
+        self.epilog = self.epilog % {
+            'outdir': '%(outdir)s',
+            'project': self.config.qthelp_basename,
+        }
         self.build_qhp(self.outdir, self.config.qthelp_basename)
 
     def build_qhp(self, outdir: str, outname: str) -> None:
