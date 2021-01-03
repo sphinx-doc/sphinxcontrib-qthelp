@@ -107,7 +107,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         for indexname, indexcls, content, collapse in self.domain_indices:
             item = section_template % {'title': indexcls.localname,
-                                       'ref': ''.join((indexname, self.out_suffix))}
+                                       'ref': indexname + self.out_suffix}
             sections.append(' ' * 4 * 4 + item)
         sections = '\n'.join(sections)  # type: ignore
 
