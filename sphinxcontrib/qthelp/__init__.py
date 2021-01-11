@@ -86,6 +86,11 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         return self.config.qthelp_theme, self.config.qthelp_theme_options
 
     def handle_finish(self) -> None:
+        if self.config.qthelp_basename != self.config.project:
+            self.epilog = self.epilog % {
+                'outdir': '%(outdir)s',
+                'project': self.config.qthelp_basename,
+            }
         self.build_qhp(self.outdir, self.config.qthelp_basename)
 
     def build_qhp(self, outdir: str, outname: str) -> None:
@@ -102,7 +107,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         for indexname, indexcls, content, collapse in self.domain_indices:
             item = section_template % {'title': indexcls.localname,
-                                       'ref': '%s.html' % indexname}
+                                       'ref': indexname + self.out_suffix}
             sections.append(' ' * 4 * 4 + item)
         sections = '\n'.join(sections)  # type: ignore
 
@@ -138,7 +143,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         homepage = 'qthelp://' + posixpath.join(
             nspace, 'doc', self.get_target_uri(self.config.master_doc))
-        startpage = 'qthelp://' + posixpath.join(nspace, 'doc', 'index.html')
+        startpage = 'qthelp://' + posixpath.join(nspace, 'doc', 'index%s' % self.link_suffix)
 
         logger.info(__('writing collection project file...'))
         with open(path.join(outdir, outname + '.qhcp'), 'w', encoding='utf-8') as f:
