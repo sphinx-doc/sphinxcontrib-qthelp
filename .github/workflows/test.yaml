@@ -23,8 +23,10 @@ jobs:
       - name: pycache
         uses: actions/cache@v2
         with:
-          path: .venv
-          key: python-${{ github.sha }}
+          path: .cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Setup python {{ matrix.python-version }}
         uses: actions/setup-python@v2
