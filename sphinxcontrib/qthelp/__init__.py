@@ -39,6 +39,8 @@ __ = get_translation(__name__, 'console')
 _idpattern = re.compile(
     r'(?P<title>.+) (\((class in )?(?P<id>[\w\.]+)( (?P<descr>\w+))?\))$')
 
+_refidpattern = re.compile(
+    r'.*#(?P<id>.*)$')
 
 section_template = '<section title="%(title)s" ref="%(ref)s"/>'
 
@@ -213,6 +215,13 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         nameattr = html.escape(name, quote=True)
         refattr = html.escape(ref[1], quote=True)
+        if not id:
+            matchobj = _refidpattern.match(refattr)
+            if matchobj:
+                groupdict = matchobj.groupdict()
+                id = groupdict.get('id')
+                if id.startswith("index-"):
+                    id = None
         if id:
             item = ' ' * 12 + '<keyword name="%s" id="%s" ref="%s"/>' % (nameattr, id, refattr)
         else:
