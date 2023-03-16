@@ -27,8 +27,8 @@ from sphinx.util.nodes import NodeMatcher
 from sphinx.util.osutil import canon_path, make_filename
 from sphinx.util.template import SphinxRenderer
 
-from sphinxcontrib.qthelp.version import __version__
-
+__version__ = '1.0.4'
+__version_info__ = (1, 0, 4)
 
 logger = logging.getLogger(__name__)
 package_dir = path.abspath(path.dirname(__file__))

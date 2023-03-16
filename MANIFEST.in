@@ -1,9 +1,0 @@
-include README.rst
-include LICENSE
-include CHANGES
-
-include tox.ini
-
-recursive-include sphinxcontrib/qthelp/templates *
-recursive-include sphinxcontrib/qthelp/locales *
-recursive-include tests *
