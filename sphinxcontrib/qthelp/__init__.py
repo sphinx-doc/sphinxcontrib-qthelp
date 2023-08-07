@@ -243,9 +243,6 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         return keywords
 
     def get_project_files(self, outdir: str) -> List[str]:
-        if not outdir.endswith(os.sep):
-            outdir += os.sep
-        olen = len(outdir)
         project_files = []
         staticdir = path.join(outdir, '_static')
         imagesdir = path.join(outdir, self.imagedir)
@@ -253,7 +250,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             resourcedir = root.startswith((staticdir, imagesdir))
             for fn in sorted(files):
                 if (resourcedir and not fn.endswith('.js')) or fn.endswith('.html'):
-                    filename = path.join(root, fn)[olen:]
+                    filename = path.relpath(path.join(root, fn), outdir)
                     project_files.append(canon_path(filename))
 
         return project_files
