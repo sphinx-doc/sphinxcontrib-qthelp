@@ -14,9 +14,10 @@ import html
 import os
 import posixpath
 import re
+from collections.abc import Iterable
 from os import path
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
 from docutils import nodes
 from docutils.nodes import Node
@@ -30,8 +31,6 @@ from sphinx.util.nodes import NodeMatcher
 from sphinx.util.osutil import canon_path, make_filename
 from sphinx.util.template import SphinxRenderer
 
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 __version__ = '1.0.4'
 __version_info__ = (1, 0, 4)
