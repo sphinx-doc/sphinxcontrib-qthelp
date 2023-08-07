@@ -1,12 +1,4 @@
-"""
-    sphinxcontrib.qthelp
-    ~~~~~~~~~~~~~~~~~~~~
-
-    Build input files for the Qt collection generator.
-
-    :copyright: Copyright 2007-2019 by the Sphinx team, see README.
-    :license: BSD, see LICENSE for details.
-"""
+"""Build input files for the Qt collection generator."""
 
 from __future__ import annotations
 
