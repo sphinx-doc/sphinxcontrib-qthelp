@@ -8,7 +8,6 @@ import posixpath
 import re
 from collections.abc import Iterable
 from os import path
-from pathlib import Path
 from typing import Any, cast
 
 from docutils import nodes
@@ -89,7 +88,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         }
         self.build_qhp(self.outdir, self.config.qthelp_basename)
 
-    def build_qhp(self, outdir: Path, outname: str) -> None:
+    def build_qhp(self, outdir: str | os.PathLike[str], outname: str) -> None:
         logger.info(__('writing project file...'))
 
         # sections
@@ -239,7 +238,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         return keywords
 
-    def get_project_files(self, outdir: Path) -> list[str]:
+    def get_project_files(self, outdir: str | os.PathLike[str]) -> list[str]:
         project_files = []
         staticdir = path.join(outdir, '_static')
         imagesdir = path.join(outdir, self.imagedir)
