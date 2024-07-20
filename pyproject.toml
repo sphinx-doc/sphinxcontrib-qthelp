@@ -45,6 +45,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest",
+    "defusedxml>=0.7.1", # for secure XML/HTML parsing
 ]
 lint = [
     "flake8",
