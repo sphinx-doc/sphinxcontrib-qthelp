@@ -124,3 +124,18 @@ def test_qthelp_title(app, status, warning):
 
     qhcp = (app.outdir / 'Python.qhcp').read_text()
     assert '<title>Sphinx &lt;b&gt;&#34;short&#34;&lt;/b&gt; title</title>' in qhcp
+
+
+@pytest.mark.sphinx('qthelp', testroot='id')
+def test_qthelp_id(app, status, warning):
+    app.builder.build_all()
+
+    et = etree_parse(app.outdir / 'Python.qhp')
+    keywords = et.find('.//keywords')
+    assert len(keywords) == 2
+    assert keywords[0].attrib == {'name': 'test-id',
+                                  'ref': 'index.html#my-testid',
+                                  'id': 'my-testid'}
+
+    assert keywords[1].attrib == {'name': 'test-id-next',
+                                  'ref': 'index.html#index-0'}
