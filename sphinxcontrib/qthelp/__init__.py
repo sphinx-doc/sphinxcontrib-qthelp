@@ -1,19 +1,14 @@
-"""
-    sphinxcontrib.qthelp
-    ~~~~~~~~~~~~~~~~~~~~
+"""Build input files for the Qt collection generator."""
 
-    Build input files for the Qt collection generator.
-
-    :copyright: Copyright 2007-2019 by the Sphinx team, see README.
-    :license: BSD, see LICENSE for details.
-"""
+from __future__ import annotations
 
 import html
 import os
 import posixpath
 import re
+from collections.abc import Iterable
 from os import path
-from typing import Any, Dict, Iterable, List, Tuple, cast
+from typing import Any, cast
 
 from docutils import nodes
 from docutils.nodes import Node
@@ -27,8 +22,9 @@ from sphinx.util.nodes import NodeMatcher
 from sphinx.util.osutil import canon_path, make_filename
 from sphinx.util.template import SphinxRenderer
 
-from sphinxcontrib.qthelp.version import __version__
 
+__version__ = '1.0.8'
+__version_info__ = (1, 0, 8)
 
 logger = logging.getLogger(__name__)
 package_dir = path.abspath(path.dirname(__file__))
@@ -84,7 +80,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         self.link_suffix = '.html'
         # self.config.html_style = 'traditional.css'
 
-    def get_theme_config(self) -> Tuple[str, Dict]:
+    def get_theme_config(self) -> tuple[str, dict]:
         return self.config.qthelp_theme, self.config.qthelp_theme_options
 
     def handle_finish(self) -> None:
@@ -94,7 +90,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         }
         self.build_qhp(self.outdir, self.config.qthelp_basename)
 
-    def build_qhp(self, outdir: str, outname: str) -> None:
+    def build_qhp(self, outdir: str | os.PathLike[str], outname: str) -> None:
         logger.info(__('writing project file...'))
 
         # sections
@@ -166,8 +162,8 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             return False
         return True
 
-    def write_toc(self, node: Node, indentlevel: int = 4) -> List[str]:
-        parts = []  # type: List[str]
+    def write_toc(self, node: Node, indentlevel: int = 4) -> list[str]:
+        parts: list[str] = []
         if isinstance(node, nodes.list_item) and self.isdocnode(node):
             compact_paragraph = cast(addnodes.compact_paragraph, node[0])
             reference = cast(nodes.reference, compact_paragraph[0])
@@ -229,8 +225,8 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         item.encode('ascii', 'xmlcharrefreplace')
         return item
 
-    def build_keywords(self, title: str, refs: List[Any], subitems: Any) -> List[str]:
-        keywords = []  # type: List[str]
+    def build_keywords(self, title: str, refs: list[Any], subitems: Any) -> list[str]:
+        keywords: list[str] = []
 
         # if len(refs) == 0: # XXX
         #     write_param('See Also', title)
@@ -251,10 +247,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         return keywords
 
-    def get_project_files(self, outdir: str) -> List[str]:
-        if not outdir.endswith(os.sep):
-            outdir += os.sep
-        olen = len(outdir)
+    def get_project_files(self, outdir: str | os.PathLike[str]) -> list[str]:
         project_files = []
         staticdir = path.join(outdir, '_static')
         imagesdir = path.join(outdir, self.imagedir)
@@ -262,13 +255,14 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             resourcedir = root.startswith((staticdir, imagesdir))
             for fn in sorted(files):
                 if (resourcedir and not fn.endswith('.js')) or fn.endswith('.html'):
-                    filename = path.join(root, fn)[olen:]
+                    filename = path.relpath(path.join(root, fn), outdir)
                     project_files.append(canon_path(filename))
 
         return project_files
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx) -> dict[str, Any]:
+    app.require_sphinx('5.0')
     app.setup_extension('sphinx.builders.html')
     app.add_builder(QtHelpBuilder)
     app.add_message_catalog(__name__, path.join(package_dir, 'locales'))
