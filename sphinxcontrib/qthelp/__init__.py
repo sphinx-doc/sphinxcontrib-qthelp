@@ -8,12 +8,11 @@ import posixpath
 import re
 from collections.abc import Iterable
 from os import path
-from typing import Any, cast
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
 
 from docutils import nodes
-from docutils.nodes import Node
 from sphinx import addnodes
-from sphinx.application import Sphinx
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.environment.adapters.indexentries import IndexEntries
 from sphinx.locale import get_translation
@@ -22,6 +21,9 @@ from sphinx.util.nodes import NodeMatcher
 from sphinx.util.osutil import canon_path, make_filename
 from sphinx.util.template import SphinxRenderer
 
+if TYPE_CHECKING:
+    from docutils.nodes import Node
+    from sphinx.application import Sphinx
 
 __version__ = '1.0.8'
 __version_info__ = (1, 0, 8)
@@ -78,7 +80,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         self.link_suffix = '.html'
         # self.config.html_style = 'traditional.css'
 
-    def get_theme_config(self) -> tuple[str, dict]:
+    def get_theme_config(self) -> tuple[str, dict[str, str | int | bool]]:
         return self.config.qthelp_theme, self.config.qthelp_theme_options
 
     def handle_finish(self) -> None:
@@ -97,22 +99,22 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         sections = []
         matcher = NodeMatcher(addnodes.compact_paragraph, toctree=True)
-        for node in tocdoc.traverse(matcher):  # type: addnodes.compact_paragraph
+        for node in tocdoc.findall(matcher):
             sections.extend(self.write_toc(node))
 
-        for indexname, indexcls, content, collapse in self.domain_indices:
+        for indexname, indexcls, _content, _collapse in self.domain_indices:
             item = section_template % {'title': indexcls.localname,
                                        'ref': indexname + self.out_suffix}
             sections.append(' ' * 4 * 4 + item)
-        sections = '\n'.join(sections)  # type: ignore
+        sections = '\n'.join(sections)  # type: ignore[assignment]
 
         # keywords
         keywords = []
         index = IndexEntries(self.env).create_index(self, group_entries=False)
-        for (key, group) in index:
-            for title, (refs, subitems, key_) in group:
+        for (_group_key, group) in index:
+            for title, (refs, subitems, _category_key) in group:
                 keywords.extend(self.build_keywords(title, refs, subitems))
-        keywords = '\n'.join(keywords)  # type: ignore
+        keywords = '\n'.join(keywords)  # type: ignore[assignment]
 
         # it seems that the "namespace" may not contain non-alphanumeric
         # characters, and more than one successive dot, or leading/trailing
@@ -120,32 +122,32 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         if self.config.qthelp_namespace:
             nspace = self.config.qthelp_namespace
         else:
-            nspace = 'org.sphinx.%s.%s' % (outname, self.config.version)
+            nspace = f'org.sphinx.{outname}.{self.config.version}'
 
         nspace = re.sub(r'[^a-zA-Z0-9.\-]', '', nspace)
         nspace = re.sub(r'\.+', '.', nspace).strip('.')
         nspace = nspace.lower()
 
         # write the project file
-        with open(path.join(outdir, outname + '.qhp'), 'w', encoding='utf-8') as f:
-            body = render_file('project.qhp', outname=outname,
-                               title=self.config.html_title, version=self.config.version,
-                               project=self.config.project, namespace=nspace,
-                               master_doc=self.config.master_doc,
-                               sections=sections, keywords=keywords,
-                               files=self.get_project_files(outdir))
-            f.write(body)
+        body = render_file('project.qhp', outname=outname,
+                           title=self.config.html_title, version=self.config.version,
+                           project=self.config.project, namespace=nspace,
+                           master_doc=self.config.master_doc,
+                           sections=sections, keywords=keywords,
+                           files=self.get_project_files(outdir))
+        filename = Path(outdir, f'{outname}.qhp')
+        filename.write_text(body, encoding='utf-8')
 
         homepage = 'qthelp://' + posixpath.join(
             nspace, 'doc', self.get_target_uri(self.config.master_doc))
-        startpage = 'qthelp://' + posixpath.join(nspace, 'doc', 'index%s' % self.link_suffix)
+        startpage = 'qthelp://' + posixpath.join(nspace, 'doc', f'index{self.link_suffix}')
 
         logger.info(__('writing collection project file...'))
-        with open(path.join(outdir, outname + '.qhcp'), 'w', encoding='utf-8') as f:
-            body = render_file('project.qhcp', outname=outname,
-                               title=self.config.html_short_title,
-                               homepage=homepage, startpage=startpage)
-            f.write(body)
+        body = render_file('project.qhcp', outname=outname,
+                           title=self.config.html_short_title,
+                           homepage=homepage, startpage=startpage)
+        filename = Path(outdir, f'{outname}.qhcp')
+        filename.write_text(body, encoding='utf-8')
 
     def isdocnode(self, node: Node) -> bool:
         if not isinstance(node, nodes.list_item):
@@ -156,9 +158,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             return False
         if not isinstance(node[0][0], nodes.reference):
             return False
-        if not isinstance(node[1], nodes.bullet_list):
-            return False
-        return True
+        return isinstance(node[1], nodes.bullet_list)
 
     def write_toc(self, node: Node, indentlevel: int = 4) -> list[str]:
         parts: list[str] = []
@@ -167,8 +167,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             reference = cast(nodes.reference, compact_paragraph[0])
             link = reference['refuri']
             title = html.escape(reference.astext()).replace('"', '&quot;')
-            item = '<section title="%(title)s" ref="%(ref)s">' % \
-                {'title': title, 'ref': link}
+            item = f'<section title="{title}" ref="{link}">'
             parts.append(' ' * 4 * indentlevel + item)
 
             bullet_list = cast(nodes.bullet_list, node[1])
@@ -185,10 +184,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             item = section_template % {'title': title, 'ref': link}
             item = ' ' * 4 * indentlevel + item
             parts.append(item.encode('ascii', 'xmlcharrefreplace').decode())
-        elif isinstance(node, nodes.bullet_list):
-            for subnode in node:
-                parts.extend(self.write_toc(subnode, indentlevel))
-        elif isinstance(node, addnodes.compact_paragraph):
+        elif isinstance(node, (nodes.bullet_list, addnodes.compact_paragraph)):
             for subnode in node:
                 parts.extend(self.write_toc(subnode, indentlevel))
 
@@ -203,16 +199,16 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
             # descr = groupdict.get('descr')
             if shortname.endswith('()'):
                 shortname = shortname[:-2]
-            id = html.escape('%s.%s' % (id, shortname), True)
+            id = html.escape(f'{id}.{shortname}', True)
         else:
             id = None
 
         nameattr = html.escape(name, quote=True)
         refattr = html.escape(ref[1], quote=True)
         if id:
-            item = ' ' * 12 + '<keyword name="%s" id="%s" ref="%s"/>' % (nameattr, id, refattr)
+            item = ' ' * 12 + f'<keyword name="{nameattr}" id="{id}" ref="{refattr}"/>'
         else:
-            item = ' ' * 12 + '<keyword name="%s" ref="%s"/>' % (nameattr, refattr)
+            item = ' ' * 12 + f'<keyword name="{nameattr}" ref="{refattr}"/>'
         item.encode('ascii', 'xmlcharrefreplace')
         return item
 
@@ -224,7 +220,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         if len(refs) == 1:
             keywords.append(self.keyword_item(title, refs[0]))
         elif len(refs) > 1:
-            for i, ref in enumerate(refs):  # XXX
+            for _i, ref in enumerate(refs):  # XXX  # NoQA: FURB148
                 # item = (' '*12 +
                 #         '<keyword name="%s [%d]" ref="%s"/>' % (
                 #          title, i, ref))
@@ -242,7 +238,7 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
         project_files = []
         staticdir = path.join(outdir, '_static')
         imagesdir = path.join(outdir, self.imagedir)
-        for root, dirs, files in os.walk(outdir):
+        for root, _dirs, files in os.walk(outdir):
             resourcedir = root.startswith((staticdir, imagesdir))
             for fn in sorted(files):
                 if (resourcedir and not fn.endswith('.js')) or fn.endswith('.html'):
