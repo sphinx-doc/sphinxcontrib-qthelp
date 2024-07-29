@@ -25,8 +25,8 @@ if TYPE_CHECKING:
     from docutils.nodes import Node
     from sphinx.application import Sphinx
 
-__version__ = '1.0.8'
-__version_info__ = (1, 0, 8)
+__version__ = '2.0.0'
+__version_info__ = (2, 0, 0)
 
 logger = logging.getLogger(__name__)
 package_dir = path.abspath(path.dirname(__file__))
