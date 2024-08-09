@@ -48,7 +48,7 @@ test = [
     "defusedxml>=0.7.1", # for secure XML/HTML parsing
 ]
 lint = [
-    "ruff==0.5.5",
+    "ruff==0.5.7",
     "mypy",
     "types-docutils",
 ]
