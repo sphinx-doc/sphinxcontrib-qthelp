@@ -95,7 +95,8 @@ class QtHelpBuilder(StandaloneHTMLBuilder):
 
         # sections
         tocdoc = self.env.get_and_resolve_doctree(self.config.master_doc, self,
-                                                  prune_toctrees=False)
+                                                  prune_toctrees=False,
+                                                  includehidden=self.config.qthelp_include_hidden_toctrees)
 
         sections = []
         matcher = NodeMatcher(addnodes.compact_paragraph, toctree=True)
@@ -258,6 +259,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
     app.add_config_value('qthelp_namespace', None, 'html', [str])
     app.add_config_value('qthelp_theme', 'nonav', 'html')
     app.add_config_value('qthelp_theme_options', {}, 'html')
+    app.add_config_value('qthelp_include_hidden_toctrees', False, 'html', [bool])
 
     return {
         'version': __version__,
