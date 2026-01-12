@@ -1,3 +1,9 @@
+Release 2.1.0 (unreleased)
+==========================
+
+* Add new config ``qthelp_include_hidden_toctrees`` that includes hidden
+  toctrees in the QtHelp outline.
+
 Release 2.0.0 (2024-07-28)
 ==========================
 
